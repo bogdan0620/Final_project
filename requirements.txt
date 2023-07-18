@@ -3,3 +3,6 @@ uvicorn
 starlette
 SQLAlchemy
 psycopg2
+python-multipart
+jinja2
+requests

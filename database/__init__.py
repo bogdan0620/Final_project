@@ -13,7 +13,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-# Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)
 
 
 def get_db():
@@ -28,3 +28,4 @@ def get_db():
 
 
 from database.musicservice import *
+from database.userservice import *

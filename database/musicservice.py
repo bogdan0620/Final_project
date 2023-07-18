@@ -4,85 +4,103 @@ import os
 from starlette.responses import FileResponse
 
 
-def get_music_db(file_id, music_name, singer):
+def add_music_db(music_name, singer, file):
     db = next(get_db())
-    if file_id and not music_name and not singer:
-        query = db.query(Music).filter_by(file_id=file_id).all()
-
-    elif file_id and music_name and not singer:
-        query = db.query(Music).filter_by(file_id=file_id, music_name=music_name).all()
-
-    elif file_id and music_name and singer:
-        query = db.query(Music).filter_by(file_id=file_id, music_name=music_name, singer=singer).all()
-
-    elif file_id and not music_name and singer:
-        query = db.query(Music).filter_by(file_id=file_id, singer=singer).all()
-
-    elif not file_id and music_name and singer:
-        query = db.query(Music).filter_by(music_name=music_name, singer=singer).all()
-
-    elif not file_id and not music_name and singer:
-        query = db.query(Music).filter_by(singer=singer).all()
-
-    elif not file_id and music_name and not singer:
-        query = db.query(Music).filter_by(music_name=music_name).all()
-
-    else:
-        query = db.query(Music).all()
-    print(query)
-    if len(query) == 0:
-        return {'message': 'No results =('}
-
-    return query
-
-
-# Add File to DB
-def add_file_to_db(music_name, singer, file):
-    db = next(get_db())
-    new_file = Music(music_name=music_name, singer=singer, type_format=file.content_type)
+    new_file = Music(music_name=music_name, singer_name=singer, type_format=file.content_type)
     db.add(new_file)
     db.commit()
-    return new_file.file_id
+    print(new_file.as_dict())
+    return new_file.as_dict()
 
 
-# Update File in DB
-def update_file_in_db(file_id, music_name, singer, file):
+def get_music_db(music_id, music_name, singer):
     db = next(get_db())
-    music = db.query(Music).filter_by(file_id=file_id).first()
-    if music:
-        os.remove("uploaded_files/" + music.music_name + f'-{music.file_id}')
-        music.music_name = music_name
-        music.singer = singer
-        music.type_format = file.content_type
+    if music_id and not music_name and not singer:
+        result1 = db.query(Music).filter_by(music_id=music_id).all()
+
+    elif music_id and music_name and not singer:
+        result1 = db.query(Music).filter_by(music_id=music_id, music_name=music_name).all()
+
+    elif music_id and music_name and singer:
+        result1 = db.query(Music).filter_by(music_id=music_id, music_name=music_name, singer_name=singer).all()
+
+    elif music_id and not music_name and singer:
+        result1 = db.query(Music).filter_by(music_id=music_id, singer_name=singer).all()
+
+    elif not music_id and music_name and singer:
+        result1 = db.query(Music).filter_by(music_name=music_name, singer_name=singer).all()
+
+    elif not music_id and not music_name and singer:
+        result1 = db.query(Music).filter_by(singer_name=singer).all()
+
+    elif not music_id and music_name and not singer:
+        result1 = db.query(Music).filter_by(music_name=music_name).all()
+
+    else:
+        result1 = db.query(Music).all()
+    result = [i.as_dict() for i in result1]
+    print(result)
+    return reversed(result)
+
+
+def update_music_db(music_id, new_music_name, singer, file):
+    db = next(get_db())
+    music1 = db.query(Music).filter_by(music_id=music_id).first()
+    print(music1)
+
+    if music1:
+        music = music1.as_dict()
+        print(music["type_format"])
+        s = music["type_format"]
+        s1 = s.replace("audio/", ".")
+        print(s1)
+
+        music1.music_name = new_music_name
+        music1.singer_name = singer
+        music1.type_format = file.content_type
         db.commit()
 
-        return 'Обновлено'
+        os.remove(f'{"uploaded_files/"}{music["music_name"]}-{music["singer_name"]}{s1}')
 
-    return 'Такой музыки нет'
+        return music
+
+    return 'Файл музыки не найден'
 
 
-def download_db(file_id):
+def download_music_db(music_id):
     db = next(get_db())
-    music = db.query(Music).filter_by(file_id=file_id).first()
-    print(music.music_name)
-    if music:
-        file_resp = FileResponse("uploaded_files/" + music.music_name + f'-{file_id}', media_type=music.type_format, filename=music.music_name)
+    music1 = db.query(Music).filter_by(music_id=music_id).first()
+    print(music1)
+    if music1:
+        music = music1.as_dict()
+        print(music["type_format"])
+        s = music["type_format"]
+        s1 = s.replace("audio/", ".")
+        print(s1)
+
+        print(music["music_name"])
+        file_resp = FileResponse(f'{"uploaded_files/"}{music["music_name"]}-{music["singer_name"]}{s1}', media_type=music["type_format"], filename=f'{music["music_name"]}-{music["singer_name"]}{s1}')
         return file_resp
 
     else:
-        return 'File not found'
+        return 'Файл музыки не найден'
 
 
-def delete_file_from_db(file_id):
+def delete_music_db(music_id):
     db = next(get_db())
-    music = db.query(Music).filter_by(file_id=file_id).first()
+    music1 = db.query(Music).filter_by(music_id=music_id).first()
 
-    if music:
-        os.remove("uploaded_files/" + music.music_name)
-        # Delete file from DB
-        db.delete(music)
+    if music1:
+        music = music1.as_dict()
+        print(music["type_format"])
+        s = music["type_format"]
+        s1 = s.replace("audio/", ".")
+        print(s1)
+        os.remove(f'{"uploaded_files/"}{music["music_name"]}-{music["singer_name"]}{s1}')
+
+        db.delete(music1)
         db.commit()
 
-        return 'Удалено'
+        return f'Удалено {music["music_name"]}-{music["singer_name"]}'
 
-    return 'File does not exist'
+    return 'Файл музыки не найден'
