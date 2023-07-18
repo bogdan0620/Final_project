@@ -39,7 +39,6 @@ def get_music_db(music_id, music_name, singer):
     else:
         result1 = db.query(Music).all()
     result = [i.as_dict() for i in result1]
-    print(result)
     return reversed(result)
 
 
@@ -50,10 +49,8 @@ def update_music_db(music_id, new_music_name, singer, file):
 
     if music1:
         music = music1.as_dict()
-        print(music["type_format"])
         s = music["type_format"]
         s1 = s.replace("audio/", ".")
-        print(s1)
 
         music1.music_name = new_music_name
         music1.singer_name = singer
@@ -70,15 +67,10 @@ def update_music_db(music_id, new_music_name, singer, file):
 def download_music_db(music_id):
     db = next(get_db())
     music1 = db.query(Music).filter_by(music_id=music_id).first()
-    print(music1)
     if music1:
         music = music1.as_dict()
-        print(music["type_format"])
         s = music["type_format"]
         s1 = s.replace("audio/", ".")
-        print(s1)
-
-        print(music["music_name"])
         file_resp = FileResponse(f'{"uploaded_files/"}{music["music_name"]}-{music["singer_name"]}{s1}', media_type=music["type_format"], filename=f'{music["music_name"]}-{music["singer_name"]}{s1}')
         return file_resp
 
@@ -92,10 +84,8 @@ def delete_music_db(music_id):
 
     if music1:
         music = music1.as_dict()
-        print(music["type_format"])
         s = music["type_format"]
         s1 = s.replace("audio/", ".")
-        print(s1)
         os.remove(f'{"uploaded_files/"}{music["music_name"]}-{music["singer_name"]}{s1}')
 
         db.delete(music1)

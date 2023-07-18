@@ -3,7 +3,6 @@ import starlette.status as status
 from main import app
 from database.userservice import register_user_db, check_password_db
 from database.musicservice import get_music_db
-from user import forms
 from fastapi import Request, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -31,28 +30,3 @@ async def register_user_api(username: str, password: str):
     result = register_user_db(username=username, password=password)
 
     return {'status': 1, 'message': result}
-#
-#
-# @app.get('/login')
-# def login_user():
-#     form = forms.RegisterLogin
-#
-#     return templates.TemplateResponse(name="login.html", context={'status': 1, 'request': form})
-#
-#
-# @app.post('/check_data')
-# def check_login_data():
-#     form = forms.RegisterLogin
-#
-#     username = form.username.data
-#     password = form.password.data
-#
-#     checker = check_password_db(username, password)
-#
-#     if checker:
-#         print('прошел проверку')
-#
-#     else:
-#         print('не прошел проверку')
-#
-#     return RedirectResponse('/')

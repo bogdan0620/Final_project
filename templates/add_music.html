@@ -5,6 +5,8 @@
     <title>Add music</title>
 </head>
 <body>
-Успешно добавлено
+{% for i in result %}
+    {{ i['music_name'] }}
+{% endfor %}
 </body>
 </html>
